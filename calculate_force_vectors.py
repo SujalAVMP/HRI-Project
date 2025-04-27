@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -213,27 +214,26 @@ for i in range(5):
         zorder=8,
     )
 
-    # Add text labels for force magnitudes
-    mid_x = arm_x + arrow_dx / 2
-    mid_y = arm_y + arrow_dy / 2
-
-    # Calculate force magnitude in 2D (x-y plane)
-    force_magnitude_2d = np.sqrt(force_vec[0] ** 2 + force_vec[1] ** 2)
-
+    # Add text labels for force magnitudes near pulley points
+    if i in [0, 4]:  # For Pulley 1 and 5, place text above
+        y_offset = 20
+        va_align = "bottom"
+    else:  # For Pulleys 2, 3, and 4, place text below
+        y_offset = -20
+        va_align = "top"
+        
     plt.text(
-        mid_x,
-        mid_y,
-        f"F{i+1}: ({force_vec[0]:.2f}, {force_vec[1]:.2f}) N\nMag: {force_magnitude_2d:.2f} N",
+        pulley_x,
+        pulley_y + y_offset,  # Use dynamic offset
+        f"F{i+1}: ({force_vec[0]:.2f}, {force_vec[1]:.2f}) N",
         fontsize=9,
         ha="center",
-        va="center",
+        va=va_align,
         bbox=dict(facecolor="white", alpha=0.8, boxstyle="round,pad=0.5"),
         zorder=9,
     )
 
-plt.title(
-    f"Arm and Pulley Positions with Force Vectors at Frame {initial_frame}", fontsize=14
-)
+plt.title("Arm and Pulley Positions with Force Vectors", fontsize=14)
 plt.xlabel("X Position (mm)", fontsize=12)
 plt.ylabel("Y Position (mm)", fontsize=12)
 plt.grid(True, alpha=0.3)
@@ -247,7 +247,7 @@ plt.figtext(
     0.5,
     0.01,
     "Force vectors represent the direction and magnitude of the 9.8N force (1kg weight) applied from each pulley.\n"
-    "Vectors are drawn from the arm position in the direction of each pulley, with magnitude proportional to the force.",
+    "Vectors are drawn from the arm position in the direction of each pulley.",
     ha="center",
     fontsize=10,
     bbox={"facecolor": "lightyellow", "alpha": 0.9, "pad": 5},
@@ -261,29 +261,80 @@ plt.savefig(f"{output_dir}/force_vectors_ball_nd_p1.png", dpi=300, bbox_inches="
 # Create a second plot showing just the force components
 plt.figure(figsize=(12, 8))
 
+# Define a professional color palette
+bar_color = '#2E86C1'  # Strong blue
+grid_color = '#EAECEE'  # Light gray
+text_color = '#2C3E50'  # Dark blue-gray
+
+# Customize the style
+plt.style.use('seaborn')  # Using just 'seaborn' instead of the specific version
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['Arial']
+plt.rcParams['axes.grid'] = True
+plt.rcParams['grid.alpha'] = 0.3
+plt.rcParams['grid.color'] = grid_color
+
 # Create bar chart for Fx components
-plt.subplot(2, 1, 1)
-plt.bar(pulley_names, [force_vec[0] for force_vec in force_vectors], color=colors[:5])
-plt.axhline(y=0, color="k", linestyle="-", alpha=0.3)
-plt.title("Force Components in X Direction (Fx)", fontsize=14)
-plt.ylabel("Force (N)", fontsize=12)
-plt.grid(True, axis="y", alpha=0.3)
+ax1 = plt.subplot(2, 1, 1)
+bars_fx = plt.bar(pulley_names, [force_vec[0] for force_vec in force_vectors], 
+                 color=bar_color, width=0.6)
+
+# Add value labels on top of each bar for Fx
+for bar in bars_fx:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height,
+             f'{height:.2f}N',
+             ha='center', va='bottom' if height >= 0 else 'top',
+             color=text_color)
+
+plt.title('Force Components in X Direction (Fx)', 
+         fontsize=14, pad=20, color=text_color, fontweight='bold')
+plt.ylabel('Force (N)', fontsize=12, color=text_color)
+ax1.set_facecolor('white')
+plt.grid(True, axis='y', color=grid_color, linestyle='-', linewidth=0.5)
+plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.3)
+
+# Customize the spines
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+ax1.spines['left'].set_color('#BDBDBD')
+ax1.spines['bottom'].set_color('#BDBDBD')
 
 # Create bar chart for Fy components
-plt.subplot(2, 1, 2)
-plt.bar(pulley_names, [force_vec[1] for force_vec in force_vectors], color=colors[:5])
-plt.axhline(y=0, color="k", linestyle="-", alpha=0.3)
-plt.title("Force Components in Y Direction (Fy)", fontsize=14)
-plt.ylabel("Force (N)", fontsize=12)
-plt.grid(True, axis="y", alpha=0.3)
+ax2 = plt.subplot(2, 1, 2)
+bars_fy = plt.bar(pulley_names, [force_vec[1] for force_vec in force_vectors], 
+                 color=bar_color, width=0.6)
 
-plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-plt.suptitle("Force Components by Pulley", fontsize=16)
+# Add value labels on top of each bar for Fy
+for bar in bars_fy:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height,
+             f'{height:.2f}N',
+             ha='center', va='bottom' if height >= 0 else 'top',
+             color=text_color)
 
-# Save the force components plot
-plt.savefig(
-    f"{output_dir}/force_components_ball_nd_p1.png", dpi=300, bbox_inches="tight"
-)
+plt.title('Force Components in Y Direction (Fy)', 
+         fontsize=14, pad=20, color=text_color, fontweight='bold')
+plt.ylabel('Force (N)', fontsize=12, color=text_color)
+ax2.set_facecolor('white')
+plt.grid(True, axis='y', color=grid_color, linestyle='-', linewidth=0.5)
+plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.3)
+
+# Customize the spines
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.spines['left'].set_color('#BDBDBD')
+ax2.spines['bottom'].set_color('#BDBDBD')
+
+# Adjust layout and add main title
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.suptitle('Force Components Analysis', 
+            fontsize=16, color=text_color, fontweight='bold', y=0.98)
+
+# Save the force components plot with higher DPI and tight layout
+plt.savefig(f"{output_dir}/force_components_ball_nd_p1.png", 
+            dpi=300, bbox_inches='tight', 
+            facecolor='white', edgecolor='none')
 plt.close()
 
 print(f"\nPlots saved to {output_dir}/")
@@ -344,37 +395,7 @@ for i in range(5):
         label=f"F{i+1}",
     )
 
-# Plot net force vector
-scale_factor = 20
-net_arrow_dx = net_fx * scale_factor
-net_arrow_dy = net_fy * scale_factor
-
-plt.arrow(
-    arm_x,
-    arm_y,
-    net_arrow_dx,
-    net_arrow_dy,
-    head_width=8,
-    head_length=15,
-    fc="black",
-    ec="black",
-    width=2.5,
-    zorder=8,
-    label="Net Force",
-)
-
-plt.text(
-    arm_x + net_arrow_dx / 2,
-    arm_y + net_arrow_dy / 2,
-    f"Net Force: ({net_fx:.2f}, {net_fy:.2f}) N\nMag: {net_magnitude:.2f} N",
-    fontsize=10,
-    ha="center",
-    va="center",
-    bbox=dict(facecolor="white", alpha=0.8, boxstyle="round,pad=0.5"),
-    zorder=9,
-)
-
-plt.title(f"Net Force Vector at Frame {initial_frame}", fontsize=14)
+plt.title(f"Force Vectors at Frame {initial_frame}", fontsize=14)
 plt.xlabel("X Position (mm)", fontsize=12)
 plt.ylabel("Y Position (mm)", fontsize=12)
 plt.grid(True, alpha=0.3)
@@ -387,8 +408,7 @@ plt.legend(loc="upper left", fontsize=10)
 plt.figtext(
     0.5,
     0.01,
-    "The black arrow represents the net force resulting from all five pulley forces combined.\n"
-    "Individual force vectors are shown with reduced opacity.",
+    "Individual force vectors showing the direction and magnitude of forces from each pulley.",
     ha="center",
     fontsize=10,
     bbox={"facecolor": "lightyellow", "alpha": 0.9, "pad": 5},

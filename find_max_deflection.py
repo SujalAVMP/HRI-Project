@@ -127,7 +127,9 @@ for csv_file in csv_files:
             'max_xdot': max_xdot,
             'max_ydot': max_ydot,
             'max_xdoubledot': max_xdoubledot,
-            'max_ydoubledot': max_ydoubledot
+            'max_ydoubledot': max_ydoubledot,
+            'x_difference': max_x - x0,
+            'y_difference': max_y - y0
         })
         
         # Create a figure for arm X and Y positions with initial and max points labeled
@@ -227,11 +229,11 @@ print(f"Saved results to {results_csv}")
 
 # Print results table
 print("\nResults Summary:")
-print("=" * 100)
-print(f"{'File':<12} | {'Initial Frame':<13} | {'Max Frame':<9} | {'Max Deflection':<14} | {'X':<8} | {'Y':<8} | {'X Dot':<8} | {'Y Dot':<8} | {'X DDot':<8} | {'Y DDot':<8}")
-print("-" * 100)
+print("=" * 130)
+print(f"{'File':<12} | {'Initial Frame':<13} | {'Max Frame':<9} | {'Max Deflection':<14} | {'X':<8} | {'Y':<8} | {'X Dot':<8} | {'Y Dot':<8} | {'X DDot':<8} | {'Y DDot':<8} | {'X Diff':<8} | {'Y Diff':<8}")
+print("-" * 130)
 for r in results:
-    print(f"{r['file']:<12} | {r['initial_frame']:<13} | {r['max_deflection_frame']:<9} | {r['max_deflection']:<14.2f} | {r['max_x']:<8.2f} | {r['max_y']:<8.2f} | {r['max_xdot']:<8.2f} | {r['max_ydot']:<8.2f} | {r['max_xdoubledot']:<8.2f} | {r['max_ydoubledot']:<8.2f}")
-print("=" * 100)
+    print(f"{r['file']:<12} | {r['initial_frame']:<13} | {r['max_deflection_frame']:<9} | {r['max_deflection']:<14.2f} | {r['max_x']:<8.2f} | {r['max_y']:<8.2f} | {r['max_xdot']:<8.2f} | {r['max_ydot']:<8.2f} | {r['max_xdoubledot']:<8.2f} | {r['max_ydoubledot']:<8.2f} | {r['x_difference']:<8.2f} | {r['y_difference']:<8.2f}")
+print("=" * 130)
 
 print("\nAll deflection analysis completed successfully!")

@@ -491,28 +491,92 @@ non_dominant_predicted_F = calculate_predicted_forces(
 dominant_force_error = np.abs(dominant_F - dominant_predicted_F)
 non_dominant_force_error = np.abs(non_dominant_F - non_dominant_predicted_F)
 
-# Plot actual vs predicted forces
-plt.figure(figsize=(12, 8))
-plt.subplot(2, 1, 1)
-plt.plot(dominant_F, "b-", label="Actual Forces")
-plt.plot(dominant_predicted_F, "r--", label="Predicted Forces")
-plt.title("Dominant Arm: Actual vs Predicted Forces")
-plt.xlabel("Force Component Index")
-plt.ylabel("Force (N)")
-plt.legend()
-plt.grid(True)
+# Create a professional force comparison plot
+def create_force_comparison_plot(actual_forces, predicted_forces, arm_type, output_dir):
+    # Set style and figure size
+    plt.style.use(['seaborn-whitegrid', 'seaborn-darkgrid'])
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Data preparation
+    x = np.arange(len(actual_forces))
+    
+    # Plot with distinct colors and styles
+    ax.plot(x, actual_forces, 'b-o', linewidth=2, label='Actual Forces',
+            markersize=8, markerfacecolor='white', markeredgewidth=2)
+    ax.plot(x, predicted_forces, 'r--o', linewidth=2, label='Predicted Forces',
+            markersize=8, markerfacecolor='white', markeredgewidth=2)
+    
+    # Calculate error metrics
+    mae = np.mean(np.abs(actual_forces - predicted_forces))
+    rmse = np.sqrt(np.mean((actual_forces - predicted_forces)**2))
+    
+    # Customize plot
+    ax.set_title(f'{arm_type} Arm Force Comparison\nMAE: {mae:.2f}N, RMSE: {rmse:.2f}N',
+                 fontsize=14, pad=20)
+    ax.set_xlabel('Measurement Point', fontsize=12)
+    ax.set_ylabel('Force (N)', fontsize=12)
+    
+    # Customize grid
+    ax.grid(True, linestyle='--', alpha=0.7)
+    
+    # Customize legend
+    ax.legend(loc='upper right', frameon=True, fontsize=10)
+    
+    # Add X/Y component labels
+    point_labels = [f'P{i//2+1}\n{"X" if i%2==0 else "Y"}' for i in range(len(actual_forces))]
+    ax.set_xticks(x)
+    ax.set_xticklabels(point_labels)
+    
+    # Add error bars
+    errors = np.abs(actual_forces - predicted_forces)
+    ax.fill_between(x, actual_forces - errors, actual_forces + errors,
+                   alpha=0.2, color='gray', label='Error Range')
+    
+    # Tight layout
+    plt.tight_layout()
+    
+    # Save plot
+    plt.savefig(f"{output_dir}/{arm_type.lower()}_force_comparison.png",
+                dpi=300, bbox_inches='tight')
+    plt.close()
 
-plt.subplot(2, 1, 2)
-plt.plot(non_dominant_F, "b-", label="Actual Forces")
-plt.plot(non_dominant_predicted_F, "r--", label="Predicted Forces")
-plt.title("Non-Dominant Arm: Actual vs Predicted Forces")
-plt.xlabel("Force Component Index")
-plt.ylabel("Force (N)")
-plt.legend()
-plt.grid(True)
+# Create plots for both arms
+create_force_comparison_plot(dominant_F, dominant_predicted_F, "Dominant", output_dir)
+create_force_comparison_plot(non_dominant_F, non_dominant_predicted_F, "Non-Dominant", output_dir)
 
+# Create combined plot
+plt.figure(figsize=(15, 6))
+
+# Plot both arms side by side
+plt.subplot(1, 2, 1)
+x = np.arange(len(dominant_F))
+plt.plot(x, dominant_F, 'b-o', linewidth=2, label='Actual',
+         markersize=8, markerfacecolor='white', markeredgewidth=2)
+plt.plot(x, dominant_predicted_F, 'r--o', linewidth=2, label='Predicted',
+         markersize=8, markerfacecolor='white', markeredgewidth=2)
+plt.title('Dominant Arm', fontsize=14)
+plt.xlabel('Measurement Point')
+plt.ylabel('Force (N)')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(x, non_dominant_F, 'b-o', linewidth=2, label='Actual',
+         markersize=8, markerfacecolor='white', markeredgewidth=2)
+plt.plot(x, non_dominant_predicted_F, 'r--o', linewidth=2, label='Predicted',
+         markersize=8, markerfacecolor='white', markeredgewidth=2)
+plt.title('Non-Dominant Arm', fontsize=14)
+plt.xlabel('Measurement Point')
+plt.ylabel('Force (N)')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend()
+
+plt.suptitle('Force Comparison: Actual vs Predicted', fontsize=16, y=1.05)
 plt.tight_layout()
-plt.savefig(f"{output_dir}/force_comparison.png", dpi=300)
+
+# Save combined plot
+plt.savefig(f"{output_dir}/combined_force_comparison.png",
+            dpi=300, bbox_inches='tight')
 plt.close()
 
 # Print verification results
